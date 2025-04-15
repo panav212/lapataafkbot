@@ -1,0 +1,13 @@
+{
+  "name": "mineflayer-bot",
+  "version": "1.0.0",
+  "description": "A Minecraft bot using Mineflayer that runs 24/7 on Render.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "mineflayer": "^4.9.0",
+    "mineflayer-pathfinder": "^2.3.2"
+  }
+}
