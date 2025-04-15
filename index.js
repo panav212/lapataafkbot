@@ -1,6 +1,7 @@
 const mineflayer = require('mineflayer');
 const { GoalFollow } = require('mineflayer-pathfinder').goals;
 const pathfinder = require('mineflayer-pathfinder').pathfinder;
+const http = require('http');  // Import HTTP module
 
 function startBot() {
   const bot = mineflayer.createBot({
@@ -11,8 +12,8 @@ function startBot() {
   });
 
   bot.loadPlugin(pathfinder);
-  
-  let isFollowing = false;
+
+  let isFollowing = false; // Track if the bot is following someone
 
   bot.on('login', () => {
     console.log('[+] Bot connected to server!');
@@ -28,21 +29,30 @@ function startBot() {
     console.log('[!] Error:', err.message);
   });
 
+  bot.on('playerJoined', (player) => {
+    // Send a welcome message when a player joins the server
+    bot.chat(`Welcome to HeroicLand, ${player.username}!`);
+  });
+
   function antiAFK() {
     setInterval(() => {
-      if (!isFollowing) {
+      if (!isFollowing) {  // Only AFK if not following a player
         bot.setControlState('jump', true);
         setTimeout(() => bot.setControlState('jump', false), 300);
+
         const yaw = Math.random() * Math.PI * 2;
         const pitch = (Math.random() - 0.5) * Math.PI / 4;
         bot.look(yaw, pitch, true);
+
         bot.setControlState('forward', true);
         setTimeout(() => bot.setControlState('forward', false), 800);
+
         bot.setControlState('back', true);
         setTimeout(() => bot.setControlState('back', false), 800);
+
         console.log('[*] Anti-AFK movement done');
       }
-    }, 180000);
+    }, 180000); 
   }
 
   bot.on('chat', (username, message) => {
@@ -56,19 +66,23 @@ function startBot() {
       case '!help':
         bot.chat("Hell nah nigga I am not gonna help you");
         break;
+
       case '!coords':
         const pos = bot.entity.position;
         bot.chat(`My coords: X=${pos.x.toFixed(1)}, Y=${pos.y.toFixed(1)}, Z=${pos.z.toFixed(1)}`);
         break;
+
       case '!jump':
         bot.chat("Jumping!");
         bot.setControlState('jump', true);
         setTimeout(() => bot.setControlState('jump', false), 500);
         break;
+
       case '!status':
         bot.chat("I'm online and AFKing like a boss");
         break;
-      case '!dance':
+
+      case '!dance':  
         bot.chat("Dancing!");
         let spinCount = 5;
         function spin() {
@@ -80,7 +94,8 @@ function startBot() {
         }
         spin();
         break;
-      case '!follow':
+
+      case '!follow':  
         if (player) {
           bot.chat(`Following ${username}`);
           isFollowing = true;
@@ -89,7 +104,8 @@ function startBot() {
           bot.chat("Player not found.");
         }
         break;
-      case '!twerk':
+
+      case '!twerk':  
         bot.chat("Twerking mode ON!");
         let twerkCount = 10;
         function twerk() {
@@ -102,7 +118,8 @@ function startBot() {
         }
         twerk();
         break;
-      case '!attack':
+
+      case '!attack':  
         if (player) {
           bot.chat(`Attacking ${username}!`);
           bot.attack(player);
@@ -110,7 +127,8 @@ function startBot() {
           bot.chat("Player not found.");
         }
         break;
-      case '!joke':
+
+      case '!joke':  
         const jokes = [
           "Why did the creeper break up with his girlfriend? Because she blew him away!",
           "What is a skeleton's least favorite room? The living room.",
@@ -118,7 +136,8 @@ function startBot() {
         ];
         bot.chat(jokes[Math.floor(Math.random() * jokes.length)]);
         break;
-      case '!say':
+
+      case '!say':  
         const msg = args.slice(1).join(" ");
         if (msg) {
           bot.chat(msg);
@@ -126,7 +145,8 @@ function startBot() {
           bot.chat("You need to type a message!");
         }
         break;
-      case '!sleep':
+
+      case '!sleep':  
         const bed = bot.findBlock({ matching: block => bot.isABed(block) });
         if (bed) {
           bot.sleep(bed, (err) => {
@@ -137,19 +157,29 @@ function startBot() {
           bot.chat("No bed nearby!");
         }
         break;
-      case '!stop':
+
+      case '!stop':  
         bot.chat("Stopping all actions. Returning to AFK mode.");
         isFollowing = false;
         bot.pathfinder.setGoal(null);
         bot.clearControlStates();
         break;
+
       case '!cmds':
         bot.chat("Available commands: !help, !coords, !jump, !status, !dance, !follow, !twerk, !attack, !joke, !say, !sleep, !stop");
         break;
+
       default:
         bot.chat("Unknown command! Type !cmds for a list of commands.");
     }
   });
 }
 
+// Start the bot
 startBot();
+
+// Simple HTTP server for Render health checks
+http.createServer((req, res) => {
+  res.writeHead(200);
+  res.end('OK');
+}).listen(process.env.PORT || 3000);
