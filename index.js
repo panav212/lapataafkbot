@@ -7,7 +7,7 @@ function startBot() {
   const bot = mineflayer.createBot({
     host: 'escapeeternity.aternos.me',  
     port: 30464,
-    username: 'BotBhaiya',             
+    username: 'ChotuDon',             
     version: '1.21.4'
   });
 
