@@ -1,3 +1,7 @@
+const express = require('express');
+const app = express();
+app.get('/', (req, res) => res.send('Lapata bot is online'));
+app.listen(3000, () => console.log('[+] Web server running on port 3000'));
 const mineflayer = require('mineflayer');
 const { GoalFollow } = require('mineflayer-pathfinder').goals;
 const pathfinder = require('mineflayer-pathfinder').pathfinder;
