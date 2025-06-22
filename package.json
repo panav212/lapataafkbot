@@ -1,13 +1,14 @@
 {
-  "name": "mineflayer-bot",
+  "name": "lapatabot-afk",
   "version": "1.0.0",
-  "description": "A Minecraft bot using Mineflayer that runs 24/7 on Render.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
+  "engines": {
+    "node": "22.x"
+  },
   "dependencies": {
-    "mineflayer": "^4.9.0",
-    "mineflayer-pathfinder": "^2.3.2"
+    "mineflayer": "^5.3.0"
   }
 }
