@@ -1,26 +1,45 @@
 const express = require('express');
 const app = express();
-app.get('/', (req, res) => res.send('Lapata bot is online'));
-app.listen(3000, () => console.log('[+] Web server running on port 3000'));
+const http = require('http');
 const mineflayer = require('mineflayer');
 const { GoalFollow } = require('mineflayer-pathfinder').goals;
 const pathfinder = require('mineflayer-pathfinder').pathfinder;
-const http = require('http');
+
+// Web server to keep bot alive
+app.get('/', (req, res) => res.send('Lapata bot is online'));
+app.listen(3000, () => console.log('[+] Web server running on port 3000'));
+
+// Change this if bot is connecting for the first time
+const FIRST_TIME = false;
+const BOT_PASSWORD = 'afkpassword123'; // Change this to your preferred bot password
 
 function startBot() {
   const bot = mineflayer.createBot({
     host: 'fakelapatasmp-kHMS.aternos.me',
     port: 30562,
     username: 'ChotuDon',
-    version: '1.20.1' // ✅ Set version to 1.20.1
+    version: '1.20.1'
   });
 
   bot.loadPlugin(pathfinder);
-
   let isFollowing = false;
 
   bot.on('login', () => {
     console.log('[+] Bot connected to server!');
+
+    // Handle AuthMe login or register
+    bot.once('spawn', () => {
+      setTimeout(() => {
+        if (FIRST_TIME) {
+          bot.chat(`/register ${BOT_PASSWORD} ${BOT_PASSWORD}`);
+          console.log('[*] Sent /register command');
+        } else {
+          bot.chat(`/login ${BOT_PASSWORD}`);
+          console.log('[*] Sent /login command');
+        }
+      }, 5000);
+    });
+
     antiAFK();
   });
 
@@ -67,7 +86,7 @@ function startBot() {
 
     switch (command) {
       case '!help':
-        bot.chat("Hell nah nigga I am not gonna help you");
+        bot.chat("Use !cmds to see my commands.");
         break;
 
       case '!coords':
@@ -180,7 +199,7 @@ function startBot() {
 
 startBot();
 
-// HTTP server to keep bot alive on platforms like Render
+// Render keep-alive
 http.createServer((req, res) => {
   res.writeHead(200);
   res.end('Bot is online');
