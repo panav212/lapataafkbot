@@ -5,42 +5,54 @@ const mineflayer = require('mineflayer');
 const { GoalFollow } = require('mineflayer-pathfinder').goals;
 const pathfinder = require('mineflayer-pathfinder').pathfinder;
 
-// Web server to keep bot alive
+// Bot config
+const BOT_USERNAME = 'ChotuDon';
+const BOT_PASSWORD = 'afkpassword123'; // Set once, works forever
+const SERVER_HOST = 'fakelapatasmp-kHMS.aternos.me';
+const SERVER_PORT = 30562;
+const MC_VERSION = '1.20.1';
+
+// Web keep-alive
 app.get('/', (req, res) => res.send('Lapata bot is online'));
 app.listen(3000, () => console.log('[+] Web server running on port 3000'));
 
-// Change this if bot is connecting for the first time
-const FIRST_TIME = false;
-const BOT_PASSWORD = 'afkpassword123'; // Change this to your preferred bot password
-
 function startBot() {
   const bot = mineflayer.createBot({
-    host: 'fakelapatasmp-kHMS.aternos.me',
-    port: 30562,
-    username: 'ChotuDon',
-    version: '1.20.1'
+    host: SERVER_HOST,
+    port: SERVER_PORT,
+    username: BOT_USERNAME,
+    version: MC_VERSION
   });
 
   bot.loadPlugin(pathfinder);
   let isFollowing = false;
+  let registered = false;
 
   bot.on('login', () => {
     console.log('[+] Bot connected to server!');
+  });
 
-    // Handle AuthMe login or register
-    bot.once('spawn', () => {
+  // Handle AuthMe login or register logic
+  bot.once('spawn', () => {
+    setTimeout(() => {
+      bot.chat(`/login ${BOT_PASSWORD}`);
+      console.log('[*] Sent /login');
+
+      // Wait 3 sec, see if login failed (still stuck at spawn)
       setTimeout(() => {
-        if (FIRST_TIME) {
+        if (!bot.health || bot.health === 0 || bot.food === 0) {
+          // Might be stuck at login prompt
           bot.chat(`/register ${BOT_PASSWORD} ${BOT_PASSWORD}`);
-          console.log('[*] Sent /register command');
+          console.log('[*] Sent /register (likely first time)');
+          registered = true;
         } else {
-          bot.chat(`/login ${BOT_PASSWORD}`);
-          console.log('[*] Sent /login command');
+          console.log('[+] Login successful');
         }
-      }, 5000);
-    });
+      }, 3000);
+    }, 5000);
 
-    antiAFK();
+    // Start AFK loop after login/register
+    setTimeout(antiAFK, 10000);
   });
 
   bot.on('end', () => {
@@ -199,7 +211,7 @@ function startBot() {
 
 startBot();
 
-// Render keep-alive
+// Keep-alive server
 http.createServer((req, res) => {
   res.writeHead(200);
   res.end('Bot is online');
